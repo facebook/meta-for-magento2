@@ -55,6 +55,12 @@
                     <frontend_model>Meta\BusinessExtension\Block\Adminhtml\System\Config\ModuleInfo</frontend_model>
                 </field>
 
+                <field id="legacy_queue_backlog" translate="label" type="text" sortOrder="15" showInDefault="1"
+                       showInWebsite="0" showInStore="1" canRestore="0">
+                    <label>Pending Conversions API events</label>
+                    <frontend_model>Meta\BusinessExtension\Block\Adminhtml\System\Config\LegacyQueueBacklog</frontend_model>
+                </field>
+
                 <field id="delete_connection" translate="label comment" type="select" sortOrder="20" showInDefault="0"
                        showInWebsite="0" showInStore="1">
                     <depends>
