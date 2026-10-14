@@ -43,6 +43,17 @@ class GraphAPIAdapter
     private const GET_ORDERS_LIMIT = 25;
 
     /**
+     * Wall-clock cap for the multipart product-feed upload curl call. Without an
+     * explicit CURLOPT_TIMEOUT the request can hang indefinitely on a stalled
+     * read from the upstream edge, leaving the cron in `status=running` forever.
+     */
+    private const FEED_UPLOAD_TIMEOUT_DEFAULT = 1800;
+
+    private const FEED_UPLOAD_CONNECT_TIMEOUT = 30;
+
+    private const FEED_UPLOAD_TIMEOUT_ENV_VAR = 'META_FEED_CRON_DEADLINE_SECONDS';
+
+    /**
      * @var mixed
      */
     private $accessToken;
@@ -255,8 +266,9 @@ class GraphAPIAdapter
      */
     private function callApiForFileTransfer($endpoint, $params, $filePath)
     {
+        $endpoint = "{$this->graphAPIConfig->getGraphBaseURL()}{$this->getGraphApiVersion()}/" . $endpoint;
+        $result = null;
         try {
-            $endpoint = "{$this->graphAPIConfig->getGraphBaseURL()}{$this->getGraphApiVersion()}/" . $endpoint;
             $curl = $this->curlFactory->create();
             $fileBaseName = $this->fileFactory->create(['filename' => $filePath, 'module' => ''])->getName();
 
@@ -264,13 +276,35 @@ class GraphAPIAdapter
             $params = array_merge($params, ['file' => $file, 'access_token' => $this->accessToken]);
             $curl->setOptions(
                 [ // This will override the $params to the post function
-                    CURLOPT_POSTFIELDS => $params
+                    CURLOPT_POSTFIELDS => $params,
+                    // Bound the multipart upload so a stalled upstream edge
+                    // can't hang the cron indefinitely. Tunable per environment
+                    // via META_FEED_CRON_DEADLINE_SECONDS so operators can adjust
+                    // without code changes.
+                    CURLOPT_TIMEOUT => $this->getFeedUploadTimeout(),
+                    CURLOPT_CONNECTTIMEOUT => self::FEED_UPLOAD_CONNECT_TIMEOUT,
                 ]
             );
             $curl->post($endpoint, ['access_token' => '']); // Gets overridden, but still needs 1 param
             $result = $curl->getBody();
         } catch (\Exception $e) {
-            $result = $e->getMessage();
+            if ($this->debugMode) {
+                $this->logger->debug(
+                    json_encode(
+                        [
+                            'endpoint' => "POST {$endpoint}",
+                            'file' => $filePath,
+                            'error' => $e->getMessage(),
+                        ],
+                        JSON_PRETTY_PRINT
+                    )
+                );
+            }
+            // Previously the message was swallowed into $result and json_decode
+            // returned null, so a failed upload looked like a success to the
+            // cron and the schedule row reported status=success. Rethrow so
+            // Magento's cron wrapper records status=error.
+            throw $e;
         }
 
         if ($this->debugMode) {
@@ -287,6 +321,27 @@ class GraphAPIAdapter
         }
 
         return json_decode($result);
+    }
+
+    /**
+     * Resolve the upload curl timeout.
+     *
+     * Reads the META_FEED_CRON_DEADLINE_SECONDS environment variable so operators
+     * can tune the cap per environment without modifying code; falls back to the
+     * built-in default when unset or invalid.
+     *
+     * @return int seconds
+     */
+    private function getFeedUploadTimeout(): int
+    {
+        $env = getenv(self::FEED_UPLOAD_TIMEOUT_ENV_VAR);
+        if ($env !== false && ctype_digit((string)$env)) {
+            $value = (int)$env;
+            if ($value > 0) {
+                return $value;
+            }
+        }
+        return self::FEED_UPLOAD_TIMEOUT_DEFAULT;
     }
 
     /**
