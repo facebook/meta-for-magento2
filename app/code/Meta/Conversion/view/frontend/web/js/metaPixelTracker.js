@@ -65,7 +65,8 @@ define([
         if (!config.payload.eventId) {
             if (nonCachedCapiEvents.includes(config.payload.eventName)) {
                 var eventIds = customerData.get('capi-event-ids')
-                eventIds.subscribe(function (eventIds) {
+                const subscription = eventIds.subscribe(function (eventIds) {
+                    subscription.dispose();
                     let eventIdsFromSection = customerData.get('capi-event-ids')();
                         if (eventIdsFromSection['eventIds'][config.payload.eventName]) {
                             config.payload.eventId = eventIdsFromSection['eventIds'][config.payload.eventName];
