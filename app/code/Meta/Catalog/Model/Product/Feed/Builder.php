@@ -516,9 +516,9 @@ class Builder
      */
     private function getColor(Product $product)
     {
-        $color = isset($this->attrMap[self::ATTR_COLOR])
-            ? $product->getData($this->attrMap[self::ATTR_COLOR])
-            : null;
+         $color = isset($this->attrMap[self::ATTR_COLOR])
+            ? $this->additionalAttributes->getCorrectText($product, $this->attrMap[self::ATTR_COLOR])
+            : $this->additionalAttributes->getCorrectText($product, self::ATTR_COLOR);
 
         if ($color && $color != '') {
             return $this->trimAttribute(self::ATTR_COLOR, $color);
@@ -536,8 +536,8 @@ class Builder
     private function getSize($product)
     {
         $size = isset($this->attrMap[self::ATTR_SIZE])
-            ? $product->getData($this->attrMap[self::ATTR_SIZE])
-            : null;
+            ? $this->additionalAttributes->getCorrectText($product, $this->attrMap[self::ATTR_SIZE])
+            : $this->additionalAttributes->getCorrectText($product, self::ATTR_SIZE);
 
         if ($size && $size != '') {
             return $this->trimAttribute(self::ATTR_SIZE, $size);

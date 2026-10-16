@@ -130,19 +130,25 @@ class AdditionalAttributes
      */
     public function getCorrectText(Product $product, string $attribute)
     {
-        $attribute_data = $product->getData($attribute);
-        if (!$attribute_data) {
-            return false;
+        if (in_array($attribute, $this->getAttributesListWithOptions())) {
+            return (string)$product->getAttributeText($attribute);
         }
 
-        if (is_string($attribute_data)) {
-            $text = $product->getAttributeText($attribute);
-            if (is_array($text)) {
-                return implode(',', $text);
+        return $product->getData($attribute) ?: false;
+    }
+
+    /**
+     * Collect list of attribute codes for user-defined attributes
+     *
+     * @return array
+     */
+    public function getAttributesListWithOptions(): array
+    {
+        return $this->getAttributeList(
+            function ($attributeList) {
+                $attributeList->addFieldToFilter('frontend_input', ['in' => ['select', 'multiselect']]);
             }
-            return $text ?: $attribute_data;
-        }
-        return $attribute_data;
+        );
     }
 
     /**
