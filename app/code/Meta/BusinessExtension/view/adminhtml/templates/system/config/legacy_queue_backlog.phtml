@@ -1,0 +1,63 @@
+<?php
+/**
+ * @var $block \Meta\BusinessExtension\Block\Adminhtml\System\Config\LegacyQueueBacklog
+ * @var $escaper \Magento\Framework\Escaper
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+
+$id = $block->getHtmlId();
+$progress = $block->getProgress();
+?>
+<div class="meta-legacy-queue" id="<?= $escaper->escapeHtmlAttr($id) ?>">
+    <p id="<?= $escaper->escapeHtmlAttr($id) ?>_text">
+        <?php if ($block->isRunning()): ?>
+            <?= $escaper->escapeHtml(
+                __(
+                    'A migration is running right now, started in another tab or on the command line. '
+                    . '%1 moved so far, %2 still waiting. Reload this page to see where it has got to.',
+                    $progress['moved'],
+                    $block->getBacklogLabel()
+                )
+            ) ?>
+        <?php elseif ($block->hasProgress()): ?>
+            <?= $escaper->escapeHtml(
+                __(
+                    '%1 messages have been moved so far and %2 are still waiting in the MySQL message '
+                    . 'queue, which this store no longer reads. Carry on where the last run stopped.',
+                    $progress['moved'],
+                    $block->getBacklogLabel()
+                )
+            ) ?>
+        <?php else: ?>
+            <?= $escaper->escapeHtml(
+                __(
+                    '%1 messages published by an earlier version of this extension are still waiting in '
+                    . 'the MySQL message queue, which this store no longer reads. They include '
+                    . 'Conversions API events. Nothing moves them on its own.',
+                    $block->getBacklogLabel()
+                )
+            ) ?>
+        <?php endif; ?>
+    </p>
+    <button type="button" class="action-default" id="<?= $escaper->escapeHtmlAttr($id) ?>_btn">
+        <span>
+            <?= $escaper->escapeHtml($block->hasProgress() ? __('Continue moving') : __('Move them now')) ?>
+        </span>
+    </button>
+</div>
+
+<?php
+$scriptString = <<<script
+    require(['Meta_BusinessExtension/js/legacy_queue_migrate'], function (migrate) {
+        migrate.init(
+            '{$escaper->escapeJs($block->getMigrateAjaxRoute())}',
+            '{$escaper->escapeJs($block->getFormKey())}',
+            '{$escaper->escapeJs($id)}',
+            {$progress['moved']},
+            {$progress['expired']},
+            {$progress['failed']}
+        );
+    });
+script;
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $scriptString, false); ?>

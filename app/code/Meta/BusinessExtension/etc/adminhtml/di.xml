@@ -18,6 +18,9 @@
                 </item>
                 <item name="conflicting_module_notification" xsi:type="string">Meta\BusinessExtension\Model\System\Message\ConflictingModulesNotification
                 </item>
+                <item name="legacy_queue_backlog_notification" xsi:type="string">
+                    Meta\BusinessExtension\Model\System\Message\LegacyQueueBacklogNotification
+                </item>
             </argument>
         </arguments>
     </type>
