@@ -100,6 +100,7 @@ Complete usage guide [HERE](https://www.facebook.com/business/help/5327492535761
 * Execute `php bin/magento setup:upgrade`.
 * Execute `php bin/magento setup:di:compile`.
 * Execute `php bin/magento cache:clean`.
+* Note: `send.conversion.event.to.meta.consumer` consumer needs to be dispached for the server events via CAPI.
 
 ### Verify Installation
 
