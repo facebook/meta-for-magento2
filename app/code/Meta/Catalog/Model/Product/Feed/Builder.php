@@ -830,7 +830,7 @@ class Builder
         $salePrice = isset($this->attrMap[self::ATTR_SALE_PRICE])
             ? $product->getData($this->attrMap[self::ATTR_SALE_PRICE]) : null;
         if (!$salePrice) {
-            $this->builderTools->getProductSalePrice($product);
+            $salePrice = $this->builderTools->getProductSalePrice($product);
         }
 
         return $salePrice;

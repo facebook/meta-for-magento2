@@ -234,8 +234,11 @@ class Tools
         if ($specialToDate) {
             $salePriceEndDate = (new \DateTime($specialToDate))->format('c');
         }
-        if ($product->getSpecialPrice() && $salePriceStartDate || $salePriceEndDate) {
-            return sprintf("%s/%s", $salePriceStartDate, $salePriceEndDate);
+        if ($product->getSpecialPrice() && $salePriceStartDate) {
+            if ($salePriceEndDate) {
+                return sprintf("%s/%s", $salePriceStartDate, $salePriceEndDate);
+            }
+            return $salePriceStartDate;
         }
         return '';
     }
