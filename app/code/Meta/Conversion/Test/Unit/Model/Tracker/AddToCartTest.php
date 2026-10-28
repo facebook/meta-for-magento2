@@ -11,12 +11,17 @@ use Magento\Framework\Escaper;
 use Meta\Conversion\Helper\MagentoDataHelper;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Catalog\Model\Product;
+use Magento\Store\Api\Data\StoreInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class AddToCartTest extends TestCase
 {
+    private const STORE_ID = 1;
+
     private $productRepositoryMock;
     private $escaperMock;
     private $magentoDataHelperMock;
+    private $storeManagerMock;
     private $subject;
 
     public function setUp(): void
@@ -30,12 +35,21 @@ class AddToCartTest extends TestCase
         $this->magentoDataHelperMock = $this->getMockBuilder(MagentoDataHelper::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $storeMock = $this->getMockBuilder(StoreInterface::class)
+            ->disableOriginalConstructor()
+            ->getMockForAbstractClass();
+        $storeMock->method('getId')->willReturn(self::STORE_ID);
+        $this->storeManagerMock = $this->getMockBuilder(StoreManagerInterface::class)
+            ->disableOriginalConstructor()
+            ->getMockForAbstractClass();
+        $this->storeManagerMock->method('getStore')->willReturn($storeMock);
 
         $objectManager = new ObjectManager($this);
         $this->subject = $objectManager->getObject(AddToCart::class, [
             'magentoDataHelper' => $this->magentoDataHelperMock,
             'productRepository' => $this->productRepositoryMock,
-            'escaper' => $this->escaperMock
+            'escaper' => $this->escaperMock,
+            'storeManager' => $this->storeManagerMock
         ]);
     }
 
@@ -51,7 +65,7 @@ class AddToCartTest extends TestCase
         ];
         $this->productRepositoryMock->expects($this->once())
             ->method('getById')
-            ->with($param['productId'])
+            ->with($param['productId'], false, self::STORE_ID)
             ->willThrowException(new NoSuchEntityException(__('Product Not Found')));
 
         $this->assertEquals([], $this->subject->getPayload($param));
@@ -87,7 +101,7 @@ class AddToCartTest extends TestCase
 
         $this->productRepositoryMock->expects($this->once())
             ->method('getById')
-            ->with($param['productId'])
+            ->with($param['productId'], false, self::STORE_ID)
             ->willReturn($productMock);
         $this->magentoDataHelperMock->expects($this->once())
             ->method('getContentId')
