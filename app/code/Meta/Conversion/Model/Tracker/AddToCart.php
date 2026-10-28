@@ -6,6 +6,7 @@ namespace Meta\Conversion\Model\Tracker;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Escaper;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Store\Model\StoreManagerInterface;
 use Meta\Conversion\Api\TrackerInterface;
 use Meta\Conversion\Helper\MagentoDataHelper;
 
@@ -29,18 +30,26 @@ class AddToCart implements TrackerInterface
     private $magentoDataHelper;
 
     /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
      * @param MagentoDataHelper $magentoDataHelper
      * @param ProductRepositoryInterface $productRepository
      * @param Escaper $escaper
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         MagentoDataHelper $magentoDataHelper,
         ProductRepositoryInterface $productRepository,
-        Escaper $escaper
+        Escaper $escaper,
+        StoreManagerInterface $storeManager
     ) {
         $this->magentoDataHelper = $magentoDataHelper;
         $this->productRepository = $productRepository;
         $this->escaper = $escaper;
+        $this->storeManager = $storeManager;
     }
 
     /**
@@ -50,7 +59,11 @@ class AddToCart implements TrackerInterface
     {
         $productId = $params['productId'];
         try {
-            $product = $this->productRepository->getById($productId);
+            $product = $this->productRepository->getById(
+                $productId,
+                false,
+                $this->storeManager->getStore()->getId()
+            );
             $contentId = $this->magentoDataHelper->getContentId($product);
             return [
                 'currency' => $this->magentoDataHelper->getCurrency(),
