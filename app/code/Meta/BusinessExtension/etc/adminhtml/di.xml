@@ -18,6 +18,9 @@
                 </item>
                 <item name="conflicting_module_notification" xsi:type="string">Meta\BusinessExtension\Model\System\Message\ConflictingModulesNotification
                 </item>
+                <item name="unsupported_magento_version_notification" xsi:type="string">
+                    Meta\BusinessExtension\Model\System\Message\UnsupportedMagentoVersionNotification
+                </item>
             </argument>
         </arguments>
     </type>

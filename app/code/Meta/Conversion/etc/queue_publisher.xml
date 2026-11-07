@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/publisher.xsd">
     <publisher topic="send.conversion.event.to.meta">
-        <connection exchange="send-conversion-event-to-meta-exchange" disabled="false"/>
+        <connection name="db" exchange="send-conversion-event-to-meta-exchange" disabled="false"/>
     </publisher>
 </config>

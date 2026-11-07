@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
-    <exchange name="send-conversion-event-to-meta-exchange" type="topic">
+    <exchange name="send-conversion-event-to-meta-exchange" type="topic" connection="db">
         <binding id="SendConversionEventToMeta" topic="send.conversion.event.to.meta" destinationType="queue" destination="send_conversion_event_to_meta"/>
     </exchange>
 </config>

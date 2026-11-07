@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
-  <exchange name="persist-meta-log-immediately-exchange" type="topic">
+  <exchange name="persist-meta-log-immediately-exchange" type="topic" connection="db">
     <binding id="PersistMetaLogImmediately" topic="persist.meta.log.immediately" destinationType="queue" destination="persist_meta_log_immediately"/>
   </exchange>
-  <exchange name="persist-meta-telemetry-logs-exchange" type="topic">
+  <exchange name="persist-meta-telemetry-logs-exchange" type="topic" connection="db">
     <binding id="PersistMetaTelemetryLogs" topic="persist.meta.telemetry.logs" destinationType="queue" destination="persist_meta_telemetry_logs"/>
   </exchange>
 </config>
