@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/publisher.xsd">
     <publisher topic="persist.meta.log.immediately">
-        <connection exchange="persist-meta-log-immediately-exchange" disabled="false"/>
+        <connection name="db" exchange="persist-meta-log-immediately-exchange" disabled="false"/>
     </publisher>
     <publisher topic="persist.meta.telemetry.logs">
-        <connection exchange="persist-meta-telemetry-logs-exchange" disabled="false"/>
+        <connection name="db" exchange="persist-meta-telemetry-logs-exchange" disabled="false"/>
     </publisher>
 </config>
