@@ -180,19 +180,20 @@ class ViewContent extends Common
             return null;
         }
 
-        $categoryIds = $product->getCategoryIds();
-        if (count($categoryIds)) {
-            $categoryNames = [];
-            $categoryModel = $this->fbeHelper->getObject(\Magento\Catalog\Model\Category::class);
-            foreach ($categoryIds as $category_id) {
-                // @todo do not load category model in loop - this can be a performance killer, use category collection
-                $category = $categoryModel->load($category_id);
-                $categoryNames[] = $category->getName();
-            }
-            return $this->escapeQuotes(implode(',', $categoryNames));
-        } else {
+        $categoryCollection = $product->getCategoryCollection()
+            ->addAttributeToSelect('name');
+
+        if (!$categoryCollection->count()) {
             return null;
         }
+
+        $categoryNames = [];
+
+        foreach ($categoryCollection as $category) {
+            $categoryNames[] = $category->getName();
+        }
+
+        return $this->escapeQuotes(implode(',', $categoryNames));
     }
 
     /**
